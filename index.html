@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de fallas automotrices aplicando Lógica Difusa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        alabaster: '#F8FAFC',
+                        cobalt: {
+                            50: '#EFF6FF',
+                            100: '#DBEAFE',
+                            500: '#3B82F6',
+                            600: '#2563EB',
+                            700: '#1D4ED8',
+                        },
+                        cyanforge: {
+                            50: '#ECFEFF',
+                            100: '#CFFAFE',
+                            600: '#0891B2',
+                            700: '#0E7490',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        /* Controles deslizantes limpios en tema luminoso */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #E2E8F0;
+            height: 0.45rem;
+            border-radius: 999px;
+            border: 1px solid #CBD5E1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px;
+            background-color: #2563EB;
+            height: 1.15rem;
+            width: 1.15rem;
+            border-radius: 50%;
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.35);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.12);
+            background-color: #1D4ED8;
+        }
+    </style>
+</head>
+<body class="bg-alabaster text-slate-800 font-sans antialiased selection:bg-cobalt-600 selection:text-white">
+
+    <!-- Barra de Navegación Superior -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-cobalt-600 flex items-center justify-center text-white font-bold shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-cobalt-600 block">Inteligencia Artificial • Lógica Difusa</span>
+                    <span class="text-sm font-bold text-slate-900 hidden sm:inline">Sistema Experto Automotriz</span>
+                </div>
+            </div>
+            <nav class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-semibold overflow-x-auto">
+                <a href="#paso-1" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-cobalt-600 hover:bg-cobalt-50 transition whitespace-nowrap">1. Captura de Síntomas</a>
+                <a href="#paso-2" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-cobalt-600 hover:bg-cobalt-50 transition whitespace-nowrap">2. Resultados</a>
+                <a href="#paso-3" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-cobalt-600 hover:bg-cobalt-50 transition whitespace-nowrap">3. Base de Fallas</a>
+                <a href="#paso-4" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-cobalt-600 hover:bg-cobalt-50 transition whitespace-nowrap">4. Fundamento Matemático</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Portada y Tarjeta de Equipo -->
+    <section class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div class="lg:col-span-7 space-y-3">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cobalt-50 border border-cobalt-200 text-cobalt-700 text-xs font-mono font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-cobalt-600"></span>
+                        Rama: Sistema Motriz, Encendido e Inyección Electrónica
+                    </span>
+                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                        Diagnóstico de fallas automotrices aplicando Lógica Difusa
+                    </h1>
+                    <p class="text-slate-600 text-sm sm:text-base max-w-2xl leading-relaxed">
+                        Selecciona los síntomas de tu vehículo en lenguaje cotidiano, elige el modo de diagnóstico y presiona ejecutar. El sistema evaluará la intersección difusa contra <strong>10 fallas del motor</strong> y te mostrará la causa probable y su reparación.
+                    </p>
+                </div>
+
+                <!-- Tarjeta Fija de Integrantes del Equipo -->
+                <div class="lg:col-span-5">
+                    <div class="bg-alabaster border border-slate-200 rounded-2xl p-5 shadow-xs">
+                        <div class="mb-3.5">
+                            <span class="text-[11px] font-mono font-bold text-cobalt-600 uppercase tracking-wider block">Equipo de Desarrollo</span>
+                            <h2 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Integrantes del Equipo</h2>
+                        </div>
+                        <div class="space-y-2.5">
+                            <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                                <span class="w-6 h-6 rounded-lg bg-cobalt-600 text-white font-mono text-xs font-bold flex items-center justify-center shrink-0">01</span>
+                                <span class="text-xs sm:text-sm font-semibold text-slate-800">Luis Armando García Larios</span>
+                            </div>
+                            <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                                <span class="w-6 h-6 rounded-lg bg-cobalt-600 text-white font-mono text-xs font-bold flex items-center justify-center shrink-0">02</span>
+                                <span class="text-xs sm:text-sm font-semibold text-slate-800">Angelo Leonel Gómez Cermeño</span>
+                            </div>
+                            <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                                <span class="w-6 h-6 rounded-lg bg-cobalt-600 text-white font-mono text-xs font-bold flex items-center justify-center shrink-0">03</span>
+                                <span class="text-xs sm:text-sm font-semibold text-slate-800">Mario Alberto Téllez Briseño</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contenido Principal en 4 Pasos Claros -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+        <!-- =====================================================================
+             PASO 1: CAPTURA DE SÍNTOMAS (15 VARIABLES)
+        ====================================================================== -->
+        <section id="paso-1" class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-6">
+            <!-- Encabezado Paso 1 -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-xs font-mono font-bold text-cobalt-600 uppercase tracking-wider">Paso 1 de 4</span>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Captura de Síntomas del Vehículo (15 Variables)</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Describe lo que sientes o escuchas en el auto. Cada respuesta se traduce a un grado difuso entre <span class="font-mono font-semibold text-slate-700">0.00</span> y <span class="font-mono font-semibold text-slate-700">1.00</span>.</p>
+                </div>
+
+                <!-- Casos de Prueba Rápidos (1 Clic) -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mr-1">Casos Rápidos:</span>
+                    <button type="button" onclick="loadPreset('bobina')" class="px-3 py-1.5 rounded-lg bg-cobalt-50 hover:bg-cobalt-100 text-cobalt-700 border border-cobalt-200 text-xs font-semibold transition">
+                        Falla de Bobina
+                    </button>
+                    <button type="button" onclick="loadPreset('bomba')" class="px-3 py-1.5 rounded-lg bg-cyanforge-50 hover:bg-cyanforge-100 text-cyanforge-700 border border-cyan-200 text-xs font-semibold transition">
+                        Bomba de Gasolina
+                    </button>
+                    <button type="button" onclick="loadPreset('sobrecalentamiento')" class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition">
+                        Sobrecalentamiento
+                    </button>
+                    <button type="button" onclick="loadPreset('normal')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition">
+                        Sin Falla / Todo Normal
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de 3 Columnas para los 14 Síntomas Visibles -->
+            <div id="symptoms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Generado dinámicamente por JS -->
+            </div>
+
+            <!-- Síntoma 15: Dato Capturado Indirectamente (Requisito de Rúbrica) -->
+            <div class="bg-cyanforge-50/70 border border-cyan-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <div class="p-2 rounded-lg bg-white border border-cyan-200 text-cyanforge-600 shrink-0 mt-0.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-mono font-bold text-cyanforge-700 uppercase">Síntoma 15 (S15) • Capturado Automáticamente en Segundo Plano</span>
+                        <h3 class="text-sm font-bold text-slate-900">Factor Ambiental / Altitud y Estrés Térmico</h3>
+                        <p class="text-xs text-slate-600 mt-0.5">
+                            Este dato no lo llena el usuario manualmente; el sistema lo calcula indirectamente según el horario térmico local y el esfuerzo exigido al motor.
+                        </p>
+                    </div>
+                </div>
+                <div class="shrink-0 bg-white border border-cyan-200 rounded-xl px-4 py-2 text-center shadow-2xs">
+                    <span class="text-[10px] font-semibold uppercase text-slate-500 block">Valor Automático S15</span>
+                    <span id="indirect-s15-badge" class="font-mono text-base font-extrabold text-cyanforge-700">0.50</span>
+                </div>
+            </div>
+
+            <!-- Configuración del Diagnóstico (Modo, Umbral y Botón Principal) -->
+            <div class="bg-alabaster border border-slate-200 rounded-2xl p-5 space-y-5">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <!-- Selector de Modo (General vs Específico) -->
+                    <div class="lg:col-span-6 space-y-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                            1. Elige el Modo de Diagnóstico:
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label id="card-mode-general" class="flex items-start gap-3 p-3.5 rounded-xl bg-white border-2 border-cobalt-600 cursor-pointer shadow-2xs transition">
+                                <input type="radio" name="diag-mode" value="general" checked onchange="switchMode('general')" class="mt-0.5 text-cobalt-600 focus:ring-cobalt-500">
+                                <div>
+                                    <span class="text-xs sm:text-sm font-bold text-slate-900 block">Diagnóstico General</span>
+                                    <span class="text-[11px] text-slate-500">Evalúa todas las 10 fallas precargadas.</span>
+                                </div>
+                            </label>
+                            <label id="card-mode-specific" class="flex items-start gap-3 p-3.5 rounded-xl bg-white border border-slate-300 hover:border-cobalt-400 cursor-pointer transition">
+                                <input type="radio" name="diag-mode" value="specific" onchange="switchMode('specific')" class="mt-0.5 text-cobalt-600 focus:ring-cobalt-500">
+                                <div>
+                                    <span class="text-xs sm:text-sm font-bold text-slate-900 block">Diagnóstico Específico</span>
+                                    <span class="text-[11px] text-slate-500">Elige 2 o más fallas específicas a comparar.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Slider de Umbral de Confiabilidad -->
+                    <div class="lg:col-span-6 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label for="threshold-slider" class="text-xs font-bold uppercase tracking-wider text-slate-700">
+                                2. Umbral de Confiabilidad Mínima (Suma &Sigma;):
+                            </label>
+                            <span id="threshold-display" class="font-mono text-xs sm:text-sm font-bold px-2.5 py-0.5 rounded-lg bg-cobalt-600 text-white">
+                                4.50 pts (30%)
+                            </span>
+                        </div>
+                        <input type="range" id="threshold-slider" min="1.5" max="10.5" step="0.5" value="4.5" class="w-full" oninput="updateThreshold(this.value)">
+                        <p class="text-[11px] text-slate-500 leading-snug">
+                            Si la suma de intersecciones (&Sigma;) de la mejor falla es menor a este umbral, el sistema indicará que <strong>ninguna falla coincide de forma confiable</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Panel Desplegable para Diagnóstico Específico (Checkboxes de las 10 Fallas) -->
+                <div id="specific-selector-panel" class="hidden pt-4 border-t border-slate-200 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span class="text-xs font-bold text-slate-800">
+                            Marca al menos 2 fallas de la lista para comparar contra tus síntomas:
+                        </span>
+                        <span id="selected-count-badge" class="font-mono text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cobalt-100 text-cobalt-700">
+                            2 seleccionadas
+                        </span>
+                    </div>
+                    <div id="specific-checkboxes" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                        <!-- Poblado por JS -->
+                    </div>
+                    <div id="specific-warning" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                        Por favor selecciona al menos 2 fallas de la lista para ejecutar el Diagnóstico Específico.
+                    </div>
+                </div>
+
+                <!-- Botón Principal de Ejecución -->
+                <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
+                    <p class="text-xs text-slate-500">
+                        El cálculo aplica la intersección mínima elemento a elemento <strong>min(u<sub>i</sub>, f<sub>i</sub>)</strong> sobre los 15 síntomas.
+                    </p>
+                    <button type="button" onclick="handleRunDiagnosisClick()" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-cobalt-600 hover:bg-cobalt-700 active:scale-[0.99] text-white font-extrabold text-sm tracking-wide shadow-md shadow-cobalt-600/20 transition flex items-center justify-center gap-2.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        EJECUTAR DIAGNÓSTICO DIFUSO
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             PASO 2: RESULTADOS DEL DIAGNÓSTICO
+        ====================================================================== -->
+        <section id="paso-2" class="space-y-6 scroll-mt-20 transition-all duration-300">
+            <!-- Banner de Resultado Principal (Esmeralda si confiable / Rosa-Ámbar si bajo umbral) -->
+            <div id="result-banner-container"></div>
+
+            <!-- Tabla Comparativa de Intersección (Estilo idéntico a la rúbrica) -->
+            <div id="comparison-table-container" class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <span class="text-xs font-mono font-bold text-cobalt-600 uppercase tracking-wider">Paso 2 de 4 • Tabla de Evaluación</span>
+                        <h2 class="text-xl font-extrabold text-slate-900">Ranking de Intersección Difusa (&Sigma;)</h2>
+                        <p class="text-xs text-slate-500">Fallas evaluadas ordenadas de mayor a menor coincidencia (&Sigma; = suma de los 15 mínimos).</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 font-semibold">
+                                <th class="px-4 py-3">Pos.</th>
+                                <th class="px-4 py-3">Falla Automotriz</th>
+                                <th class="px-4 py-3 text-center">Suma Intersección (&Sigma;)</th>
+                                <th class="px-4 py-3 text-center">Coincidencia %</th>
+                                <th class="px-4 py-3 text-center">Estado (vs. Umbral)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ranking-table-body" class="divide-y divide-slate-200">
+                            <!-- Poblado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Desglose Visual de la Falla Ganadora (15 Síntomas lado a lado) -->
+            <div id="breakdown-container" class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+                    <div>
+                        <span class="text-xs font-mono font-bold text-cyanforge-600 uppercase tracking-wider">Desglose Paso a Paso</span>
+                        <h3 id="breakdown-title" class="text-lg sm:text-xl font-extrabold text-slate-900">Comparación Síntoma por Síntoma</h3>
+                        <p class="text-xs text-slate-500">Observa cómo para cada síntoma se toma el valor más pequeño (<strong>min</strong>) entre el usuario y la falla patrón.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-4 text-xs font-semibold">
+                        <span class="flex items-center gap-1.5 text-cobalt-700"><span class="w-3 h-3 rounded-xs bg-cobalt-600 inline-block"></span> Usuario (u<sub>i</sub>)</span>
+                        <span class="flex items-center gap-1.5 text-cyanforge-700"><span class="w-3 h-3 rounded-xs bg-cyanforge-600 inline-block"></span> Falla Patrón (f<sub>i</sub>)</span>
+                        <span class="flex items-center gap-1.5 text-emerald-700"><span class="w-3 h-3 rounded-xs bg-emerald-600 inline-block"></span> Intersección min(u<sub>i</sub>, f<sub>i</sub>)</span>
+                    </div>
+                </div>
+                <div id="breakdown-bars" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    <!-- Poblado por JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             PASO 3: MÓDULO PRE-CARGADO (10 FALLAS × 15 SÍNTOMAS)
+        ====================================================================== -->
+        <section id="paso-3" class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-mono font-bold text-cobalt-600 uppercase tracking-wider">Paso 3 de 4 • Módulo Pre-cargado</span>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Base de Conocimientos: 10 Fallas × 15 Síntomas</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Matriz única de valores difusos en <span class="font-mono">[0.0, 1.0]</span> (sin combinaciones duplicadas), origen y reparación de cada falla.</p>
+                </div>
+                <button type="button" onclick="toggleMatrixTable()" id="btn-toggle-matrix" class="px-4 py-2 rounded-xl bg-cobalt-50 hover:bg-cobalt-100 text-cobalt-700 border border-cobalt-200 text-xs font-bold transition shrink-0">
+                    Mostrar Matriz Numérica (10×15)
+                </button>
+            </div>
+
+            <!-- Tabla Matricial Expandible (10x15) -->
+            <div id="matrix-wrapper" class="hidden overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left border-collapse text-xs font-mono">
+                    <thead>
+                        <tr id="matrix-header" class="bg-slate-100 text-slate-700 border-b border-slate-200"></tr>
+                    </thead>
+                    <tbody id="matrix-body" class="divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+
+            <!-- Catálogo de las 10 Fallas con Origen y Reparación -->
+            <div id="faults-catalog" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Poblado por JS -->
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             PASO 4: FUNDAMENTO MATEMÁTICO Y FUNCIONAMIENTO DEL ALGORITMO
+        ====================================================================== -->
+        <section id="paso-4" class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-5">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-xs font-mono font-bold text-cobalt-600 uppercase tracking-wider">Paso 4 de 4 • Marco Teórico del Proyecto</span>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Fundamento Matemático y Funcionamiento del Algoritmo</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Formulación matemática exacta utilizada por el motor de inferencia para evaluar el diagnóstico vehicular.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <!-- Tarjeta 1: Conjuntos Difusos -->
+                <div class="bg-alabaster border border-slate-200 rounded-2xl p-5 flex flex-col justify-between gap-4">
+                    <div class="space-y-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-full bg-cobalt-600 text-white font-mono text-xs font-bold flex items-center justify-center">1</span>
+                            <h3 class="text-base font-extrabold text-slate-900">Conjuntos Difusos y Lenguaje Ambiguo</h3>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            A diferencia de la lógica clásica booleana (<span class="font-mono font-semibold text-slate-800">{0, 1}</span>), los conjuntos difusos asignan grados de pertenencia continuos en el intervalo <span class="font-mono font-semibold text-cobalt-700">[0.0, 1.0]</span>.
+                        </p>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl p-3.5 text-center">
+                        <span class="font-mono text-xs sm:text-sm font-bold text-slate-900">
+                            &mu;<sub>A</sub>(x<sub>i</sub>) &isin; [0.0, 1.0]
+                        </span>
+                        <span class="block text-[11px] text-slate-500 mt-1">Ej. "Vibración notoria en ralentí" &rarr; 0.70</span>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Intersección de Zadeh -->
+                <div class="bg-alabaster border border-slate-200 rounded-2xl p-5 flex flex-col justify-between gap-4">
+                    <div class="space-y-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-full bg-cyanforge-600 text-white font-mono text-xs font-bold flex items-center justify-center">2</span>
+                            <h3 class="text-base font-extrabold text-slate-900">Intersección Difusa (T-norma &cap;)</h3>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Para cada uno de los 15 síntomas (<span class="font-mono">i = 1, ..., 15</span>), el grado de coincidencia entre el usuario <strong>U</strong> y la falla <strong>F</strong> se obtiene aplicando el operador mínimo de Zadeh:
+                        </p>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl p-3.5 text-center">
+                        <span class="font-mono text-xs sm:text-sm font-bold text-cyanforge-700">
+                            &mu;<sub>(U &cap; F)</sub>(x<sub>i</sub>) = min( &mu;<sub>U</sub>(x<sub>i</sub>), &mu;<sub>F</sub>(x<sub>i</sub>) )
+                        </span>
+                        <span class="block text-[11px] text-slate-500 mt-1">Representa el grado común en el síntoma i</span>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Sumatoria y Umbral -->
+                <div class="bg-alabaster border border-slate-200 rounded-2xl p-5 flex flex-col justify-between gap-4">
+                    <div class="space-y-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-full bg-emerald-600 text-white font-mono text-xs font-bold flex items-center justify-center">3</span>
+                            <h3 class="text-base font-extrabold text-slate-900">Sumatoria (&Sigma;) y Umbral de Confiabilidad</h3>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Se suman las 15 intersecciones individuales para obtener la coincidencia total <strong>&Sigma;</strong> y se compara la puntuación máxima contra el umbral definido:
+                        </p>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl p-3.5 text-center space-y-1">
+                        <div class="font-mono text-xs sm:text-sm font-bold text-emerald-700">
+                            &Sigma; = &sum;<sub>i=1</sub><sup>15</sup> min( &mu;<sub>U</sub>(x<sub>i</sub>), &mu;<sub>F</sub>(x<sub>i</sub>) )
+                        </div>
+                        <div class="font-mono text-xs font-semibold text-slate-800 pt-1 border-t border-slate-100">
+                            Diagnóstico Confiable &hArr; &Sigma;<sub>máx</sub> &ge; Umbral
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-6 mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <p class="font-semibold text-slate-700">Diagnóstico de fallas automotrices aplicando Lógica Difusa</p>
+            <p class="font-mono">10 Fallas Pre-cargadas • 15 Síntomas • Intersección de Zadeh</p>
+        </div>
+    </footer>
+
+    <script>
+        // =========================================================================
+        // 1. DEFINICIÓN DE LOS 15 SÍNTOMAS (14 AMBIGUOS VISIBLES + 1 AUTOMÁTICO)
+        // =========================================================================
+        const SYMPTOMS = [
+            {
+                id: 1, code: 'S1', name: 'Dificultad al encender en frío',
+                type: 'select',
+                options: [
+                    { label: 'Enciende al instante (Normal)', val: 0.0 },
+                    { label: 'Tarda un par de segundos', val: 0.3 },
+                    { label: 'Requiere varios intentos', val: 0.7 },
+                    { label: 'No arranca o se apaga enseguida', val: 1.0 }
+                ]
+            },
+            {
+                id: 2, code: 'S2', name: 'Vibración del motor detenido (ralentí inestable)',
+                type: 'slider',
+                minLabel: 'Parejo (0.0)',
+                maxLabel: 'Cascabeleo fuerte (1.0)'
+            },
+            {
+                id: 3, code: 'S3', name: 'Pérdida de potencia al acelerar',
+                type: 'select',
+                options: [
+                    { label: 'Responde con fuerza normal', val: 0.0 },
+                    { label: 'Se siente ligeramente pesado', val: 0.35 },
+                    { label: 'Le cuesta mucho ganar velocidad', val: 0.75 },
+                    { label: 'Sin fuerza / modo protección', val: 1.0 }
+                ]
+            },
+            {
+                id: 4, code: 'S4', name: 'Consumo excesivo de gasolina',
+                type: 'select',
+                options: [
+                    { label: 'Rendimiento habitual', val: 0.0 },
+                    { label: 'Gasta un poco más de lo normal', val: 0.35 },
+                    { label: 'El tanque baja notoriamente rápido', val: 0.75 },
+                    { label: 'Consumo exagerado / olor a gasolina', val: 1.0 }
+                ]
+            },
+            {
+                id: 5, code: 'S5', name: 'Humo negro por el tubo de escape',
+                type: 'select',
+                options: [
+                    { label: 'Escape limpio / sin humo', val: 0.0 },
+                    { label: 'Bocanada leve al acelerar fuerte', val: 0.40 },
+                    { label: 'Humo oscuro constante al acelerar', val: 0.80 },
+                    { label: 'Humo negro espeso y hollín', val: 1.0 }
+                ]
+            },
+            {
+                id: 6, code: 'S6', name: 'Humo blanco o azulado persistente',
+                type: 'select',
+                options: [
+                    { label: 'Ninguno (solo vapor leve en frío)', val: 0.0 },
+                    { label: 'Humo ligero al arrancar en la mañana', val: 0.35 },
+                    { label: 'Humo blanco/azulado visible en marcha', val: 0.75 },
+                    { label: 'Nube densa continua con olor dulce', val: 1.0 }
+                ]
+            },
+            {
+                id: 7, code: 'S7', name: 'Subida de temperatura en el tablero',
+                type: 'slider',
+                minLabel: 'Normal 90°C (0.0)',
+                maxLabel: 'Sobrecalentado (1.0)'
+            },
+            {
+                id: 8, code: 'S8', name: 'Jaloneos o tironeos al ir avanzando',
+                type: 'select',
+                options: [
+                    { label: 'Marcha suave sin cortes', val: 0.0 },
+                    { label: 'Pequeños tirones ocasionales', val: 0.35 },
+                    { label: 'Jaloneos frecuentes al acelerar', val: 0.75 },
+                    { label: 'Cortes bruscos continuos', val: 1.0 }
+                ]
+            },
+            {
+                id: 9, code: 'S9', name: 'Golpe seco al encender o meter velocidad',
+                type: 'select',
+                options: [
+                    { label: 'Suave y firme sin golpes', val: 0.0 },
+                    { label: 'Ligero movimiento al arrancar', val: 0.35 },
+                    { label: 'Golpe notorio al pasar de P a D/R', val: 0.80 },
+                    { label: 'Sacudida fuerte en toda la cabina', val: 1.0 }
+                ]
+            },
+            {
+                id: 10, code: 'S10', name: 'Luz Check Engine o testigo de batería encendido',
+                type: 'select',
+                options: [
+                    { label: 'Tablero sin testigos de falla', val: 0.0 },
+                    { label: 'Testigo intermitente ocasional', val: 0.50 },
+                    { label: 'Check Engine fijo encendido', val: 0.85 },
+                    { label: 'Check Engine parpadeando / alerta roja', val: 1.0 }
+                ]
+            },
+            {
+                id: 11, code: 'S11', name: 'Luces bajas o fallos eléctricos al encender accesorios',
+                type: 'slider',
+                minLabel: 'Estable (0.0)',
+                maxLabel: 'Se descarga batería (1.0)'
+            },
+            {
+                id: 12, code: 'S12', name: 'Acelerador tardado o revoluciones locas',
+                type: 'select',
+                options: [
+                    { label: 'Aceleración inmediata y estable', val: 0.0 },
+                    { label: 'Pequeño retraso al pisar el pedal', val: 0.40 },
+                    { label: 'RPM suben y bajan solas en alto', val: 0.80 },
+                    { label: 'Pedal no responde / motor limitado', val: 1.0 }
+                ]
+            },
+            {
+                id: 13, code: 'S13', name: 'Olor a gasolina cruda, huevo podrido o anticongelante',
+                type: 'select',
+                options: [
+                    { label: 'Sin olores anormales', val: 0.0 },
+                    { label: 'Olor tenue tras viajes largos', val: 0.35 },
+                    { label: 'Olor penetrante en cabina o cofre', val: 0.75 },
+                    { label: 'Olor intenso constante / evaporación', val: 1.0 }
+                ]
+            },
+            {
+                id: 14, code: 'S14', name: 'Ahogamiento del motor en subidas o rebases',
+                type: 'slider',
+                minLabel: 'Sube con fuerza (0.0)',
+                maxLabel: 'Se ahoga / apaga (1.0)'
+            },
+            {
+                id: 15, code: 'S15', name: 'Factor ambiental / térmico automático',
+                type: 'indirect'
+            }
+        ];
+
+        // =========================================================================
+        // 2. MÓDULO PRE-CARGADO: 10 FALLAS AUTOMOTRICES × 15 SÍNTOMAS ÚNICOS
+        // Ninguna combinación de 15 valores se repite entre dos fallas distintas.
+        // =========================================================================
+        const FAULTS_DB = [
+            {
+                id: 1,
+                code: 'F01',
+                name: 'Falla en Bobinas de Encendido',
+                subsystem: 'Sistema de Ignición',
+                symptoms: [0.7, 0.9, 0.8, 0.7, 0.5, 0.0, 0.1, 0.9, 0.3, 0.9, 0.1, 0.2, 0.6, 0.7, 0.5],
+                origin: 'Aislamiento interno dañado o embobinado quemado en una o más bobinas, causando pérdida de chispa (misfire) en el cilindro.',
+                repair: 'Escanear códigos P0300–P030X para ubicar el cilindro con fallo y reemplazar la bobina defectuosa.'
+            },
+            {
+                id: 2,
+                code: 'F02',
+                name: 'Inyectores de Combustible Sucios o con Fuga',
+                subsystem: 'Inyección Electrónica',
+                symptoms: [0.8, 0.8, 0.7, 0.9, 0.9, 0.1, 0.0, 0.8, 0.2, 0.8, 0.0, 0.2, 0.8, 0.6, 0.5],
+                origin: 'Depósitos de carbón en las boquillas o sello desgastado que impide pulverizar correctamente la gasolina.',
+                repair: 'Limpieza de inyectores por ultrasonido en laboratorio, cambio de microfiltros y ligas (O-rings).'
+            },
+            {
+                id: 3,
+                code: 'F03',
+                name: 'Bomba de Gasolina con Baja Presión',
+                subsystem: 'Alimentación de Combustible',
+                symptoms: [0.9, 0.6, 0.9, 0.2, 0.0, 0.0, 0.1, 0.8, 0.1, 0.7, 0.1, 0.3, 0.1, 1.0, 0.5],
+                origin: 'Desgaste del motor eléctrico de la bomba sumergible o cedazo tapado que impide mantener presión en el riel.',
+                repair: 'Medir presión de combustible con manómetro, cambiar filtro de gasolina y reemplazar el módulo de bomba.'
+            },
+            {
+                id: 4,
+                code: 'F04',
+                name: 'Termostato Pegado Cerrado (Sobrecalentamiento)',
+                subsystem: 'Sistema de Enfriamiento',
+                symptoms: [0.1, 0.2, 0.5, 0.2, 0.0, 0.3, 1.0, 0.1, 0.0, 0.7, 0.0, 0.1, 0.8, 0.4, 0.6],
+                origin: 'Válvula térmica atascada que bloquea el paso del anticongelante hacia el radiador cuando el motor calienta.',
+                repair: 'Sustituir el termostato por uno original, rellenar con anticongelante especificado y purgar el aire del sistema.'
+            },
+            {
+                id: 5,
+                code: 'F05',
+                name: 'Cuerpo de Aceleración Sucio o Descalibrado',
+                subsystem: 'Admisión de Aire',
+                symptoms: [0.6, 0.9, 0.5, 0.4, 0.2, 0.0, 0.0, 0.6, 0.2, 0.8, 0.0, 1.0, 0.1, 0.4, 0.4],
+                origin: 'Acumulación de hollín y aceite en la mariposa de aceleración que altera el paso de aire en marcha mínima.',
+                repair: 'Limpiar el cuerpo de aceleración con aerosol especializado y calibrar el ralentí con escáner automotriz.'
+            },
+            {
+                id: 6,
+                code: 'F06',
+                name: 'Sensor de Flujo de Aire (MAF) Contaminado',
+                subsystem: 'Sensores de Motor',
+                symptoms: [0.5, 0.7, 0.8, 0.9, 0.8, 0.0, 0.0, 0.7, 0.0, 0.8, 0.0, 0.5, 0.5, 0.7, 0.5],
+                origin: 'Polvo o aceite adherido al filamento del sensor MAF que envía lecturas erróneas de aire a la computadora.',
+                repair: 'Limpiar suavemente con limpiador dieléctrico exclusivo para sensor MAF y revisar que el filtro de aire selle bien.'
+            },
+            {
+                id: 7,
+                code: 'F07',
+                name: 'Alternador Defectuoso / Falla de Carga',
+                subsystem: 'Sistema Eléctrico',
+                symptoms: [0.8, 0.3, 0.2, 0.1, 0.0, 0.0, 0.0, 0.2, 0.0, 0.9, 1.0, 0.2, 0.1, 0.1, 0.4],
+                origin: 'Desgaste de carbones, diodos o regulador de voltaje que impide recargar la batería durante la marcha.',
+                repair: 'Verificar voltaje con multímetro (debe marcar 13.8V–14.4V encendido) y reparar o sustituir el alternador.'
+            },
+            {
+                id: 8,
+                code: 'F08',
+                name: 'Sensor de Oxígeno (Sonda Lambda O2) Dañado',
+                subsystem: 'Control de Emisiones',
+                symptoms: [0.3, 0.6, 0.6, 1.0, 0.8, 0.0, 0.1, 0.5, 0.0, 0.9, 0.0, 0.2, 0.9, 0.5, 0.5],
+                origin: 'Elemento cerámico envejecido o contaminado que provoca que la computadora inyecte gasolina en exceso.',
+                repair: 'Reemplazar el sensor de oxígeno primario (Banco 1 Sensor 1) y borrar códigos de falla de la memoria.'
+            },
+            {
+                id: 9,
+                code: 'F09',
+                name: 'Soporte de Motor Vencido o Roto',
+                subsystem: 'Sujeción Tren Motriz',
+                symptoms: [0.1, 0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.2, 1.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.4],
+                origin: 'Hule agrietado o pérdida de fluido hidráulico del soporte que absorbe las vibraciones del motor hacia la cabina.',
+                repair: 'Revisar los soportes de motor y transmisión e instalar el reemplazo nuevo de calidad OEM.'
+            },
+            {
+                id: 10,
+                code: 'F10',
+                name: 'Empaque de Cabeza (Culata) Quemado',
+                subsystem: 'Mecánica Interna',
+                symptoms: [0.6, 0.7, 0.7, 0.3, 0.1, 1.0, 0.9, 0.4, 0.2, 0.6, 0.0, 0.1, 0.9, 0.6, 0.6],
+                origin: 'Sobrecalentamiento previo que deformó la junta de culata, permitiendo paso de anticongelante a los cilindros.',
+                repair: 'Desmontar cabeza de motor, rectificar superficie plana, instalar empaque nuevo y cambiar aceite y refrigerante.'
+            }
+        ];
+
+        // =========================================================================
+        // 3. ESTADO GLOBAL DE LA APLICACIÓN
+        // =========================================================================
+        let userVector = new Array(15).fill(0.0);
+        let thresholdSum = 4.5; // Umbral en puntos de suma Σ (de 0 a 15)
+        let currentMode = 'general'; // 'general' | 'specific'
+        let selectedFaultIds = new Set([1, 2]);
+
+        // Inferencia automática del Síntoma 15 (dato indirecto)
+        function updateIndirectS15() {
+            const hour = new Date().getHours();
+            const isHotHours = hour >= 11 && hour <= 17;
+            const loadHint = ((userVector[2] || 0) + (userVector[6] || 0)) * 0.1;
+            const val = Math.min(0.80, Number(((isHotHours ? 0.55 : 0.45) + loadHint).toFixed(2)));
+            userVector[14] = val;
+            const badge = document.getElementById('indirect-s15-badge');
+            if (badge) badge.textContent = val.toFixed(2);
+        }
+
+        // =========================================================================
+        // 4. RENDERIZADO DE CONTROLES DE SÍNTOMAS (14 VISIBLES)
+        // =========================================================================
+        function renderSymptomsGrid() {
+            const grid = document.getElementById('symptoms-grid');
+            const visible = SYMPTOMS.filter(s => s.type !== 'indirect');
+
+            grid.innerHTML = visible.map((s, idx) => {
+                if (s.type === 'select') {
+                    const opts = s.options.map(o => `<option value="${o.val}">${o.label}</option>`).join('');
+                    return `
+                        <div class="bg-alabaster border border-slate-200 hover:border-cobalt-300 rounded-xl p-4 flex flex-col justify-between gap-2.5 transition">
+                            <div class="flex items-start justify-between gap-2">
+                                <label for="sym-${s.id}" class="text-xs font-bold text-slate-800 leading-snug">
+                                    <span class="font-mono text-cobalt-600 mr-1">${s.code}.</span>${s.name}
+                                </label>
+                                <span id="badge-${s.id}" class="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 shrink-0">
+                                    0.00
+                                </span>
+                            </div>
+                            <select id="sym-${s.id}" onchange="onSymptomChange(${idx}, this.value)" class="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-xs font-medium text-slate-800 focus:border-cobalt-600 focus:outline-none">
+                                ${opts}
+                            </select>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="bg-alabaster border border-slate-200 hover:border-cobalt-300 rounded-xl p-4 flex flex-col justify-between gap-2.5 transition">
+                            <div class="flex items-start justify-between gap-2">
+                                <label for="sym-${s.id}" class="text-xs font-bold text-slate-800 leading-snug">
+                                    <span class="font-mono text-cobalt-600 mr-1">${s.code}.</span>${s.name}
+                                </label>
+                                <span id="badge-${s.id}" class="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 shrink-0">
+                                    0.00
+                                </span>
+                            </div>
+                            <div>
+                                <input type="range" id="sym-${s.id}" min="0" max="1" step="0.05" value="0" oninput="onSymptomChange(${idx}, this.value)" class="w-full">
+                                <div class="flex justify-between text-[10px] font-mono text-slate-500 mt-1">
+                                    <span>${s.minLabel}</span>
+                                    <span>${s.maxLabel}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        function onSymptomChange(index, rawVal) {
+            const val = parseFloat(rawVal);
+            userVector[index] = val;
+            refreshBadge(index);
+            updateIndirectS15();
+            runDiagnosis();
+        }
+
+        function refreshBadge(index) {
+            const s = SYMPTOMS[index];
+            const badge = document.getElementById(`badge-${s.id}`);
+            if (!badge) return;
+            const val = userVector[index];
+            badge.textContent = val.toFixed(2);
+            badge.className = val >= 0.6
+                ? 'font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-cobalt-600 text-white shrink-0'
+                : val > 0
+                    ? 'font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-cobalt-50 border border-cobalt-200 text-cobalt-700 shrink-0'
+                    : 'font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-500 shrink-0';
+        }
+
+        function syncInputsFromVector() {
+            for (let i = 0; i < 14; i++) {
+                const s = SYMPTOMS[i];
+                const el = document.getElementById(`sym-${s.id}`);
+                if (!el) continue;
+                if (s.type === 'select') {
+                    let bestOpt = s.options[0].val;
+                    let minDiff = 99;
+                    s.options.forEach(o => {
+                        const d = Math.abs(o.val - userVector[i]);
+                        if (d < minDiff) { minDiff = d; bestOpt = o.val; }
+                    });
+                    userVector[i] = bestOpt;
+                    el.value = bestOpt;
+                } else {
+                    el.value = userVector[i];
+                }
+                refreshBadge(i);
+            }
+            updateIndirectS15();
+        }
+
+        // =========================================================================
+        // 6. CASOS DE PRUEBA RÁPIDOS (1 CLIC)
+        // =========================================================================
+        function loadPreset(type) {
+            if (type === 'bobina') {
+                userVector = [0.7, 0.9, 0.75, 0.75, 0.40, 0.0, 0.1, 0.75, 0.35, 0.85, 0.1, 0.0, 0.75, 0.7, 0.5];
+            } else if (type === 'bomba') {
+                userVector = [1.0, 0.6, 0.75, 0.0, 0.0, 0.0, 0.1, 0.75, 0.0, 0.85, 0.1, 0.40, 0.0, 1.0, 0.5];
+            } else if (type === 'sobrecalentamiento') {
+                userVector = [0.0, 0.2, 0.35, 0.0, 0.0, 0.35, 1.0, 0.0, 0.0, 0.85, 0.0, 0.0, 0.75, 0.4, 0.6];
+            } else if (type === 'normal') {
+                userVector = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.45];
+            }
+            syncInputsFromVector();
+            runDiagnosis();
+        }
+
+        // =========================================================================
+        // 7. MODO DE DIAGNÓSTICO Y UMBRAL
+        // =========================================================================
+        function switchMode(mode) {
+            currentMode = mode;
+            const cardGen = document.getElementById('card-mode-general');
+            const cardSpec = document.getElementById('card-mode-specific');
+            const specPanel = document.getElementById('specific-selector-panel');
+
+            if (mode === 'general') {
+                cardGen.className = 'flex items-start gap-3 p-3.5 rounded-xl bg-white border-2 border-cobalt-600 cursor-pointer shadow-2xs transition';
+                cardSpec.className = 'flex items-start gap-3 p-3.5 rounded-xl bg-white border border-slate-300 hover:border-cobalt-400 cursor-pointer transition';
+                specPanel.classList.add('hidden');
+            } else {
+                cardSpec.className = 'flex items-start gap-3 p-3.5 rounded-xl bg-white border-2 border-cobalt-600 cursor-pointer shadow-2xs transition';
+                cardGen.className = 'flex items-start gap-3 p-3.5 rounded-xl bg-white border border-slate-300 hover:border-cobalt-400 cursor-pointer transition';
+                specPanel.classList.remove('hidden');
+            }
+            runDiagnosis();
+        }
+
+        function updateThreshold(val) {
+            thresholdSum = parseFloat(val);
+            const pct = Math.round((thresholdSum / 15) * 100);
+            document.getElementById('threshold-display').textContent = `${thresholdSum.toFixed(2)} pts (${pct}%)`;
+            runDiagnosis();
+        }
+
+        function renderSpecificCheckboxes() {
+            const container = document.getElementById('specific-checkboxes');
+            container.innerHTML = FAULTS_DB.map(f => {
+                const checked = selectedFaultIds.has(f.id) ? 'checked' : '';
+                return `
+                    <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-slate-200 hover:border-cobalt-400 cursor-pointer text-xs transition">
+                        <input type="checkbox" ${checked} onchange="toggleSpecificFault(${f.id}, this.checked)" class="rounded border-slate-300 text-cobalt-600 focus:ring-cobalt-500">
+                        <span class="font-semibold text-slate-800"><strong class="font-mono text-cobalt-600">${f.code}</strong> ${f.name}</span>
+                    </label>
+                `;
+            }).join('');
+            updateSelectedBadge();
+        }
+
+        function toggleSpecificFault(id, checked) {
+            if (checked) selectedFaultIds.add(id);
+            else selectedFaultIds.delete(id);
+            updateSelectedBadge();
+            runDiagnosis();
+        }
+
+        function updateSelectedBadge() {
+            document.getElementById('selected-count-badge').textContent = `${selectedFaultIds.size} seleccionadas`;
+        }
+
+        // =========================================================================
+        // 8. MOTOR DE INFERENCIA DIFUSA (INTERSECCIÓN DE ZADEH Y SUMATORIA Σ)
+        // =========================================================================
+        function evaluateFault(fault) {
+            const intersections = [];
+            let sumIntersection = 0;
+            let faultMaxPossible = 0;
+
+            for (let i = 0; i < 15; i++) {
+                const u = userVector[i];
+                const f = fault.symptoms[i];
+                const minVal = Math.min(u, f);
+                intersections.push(minVal);
+                sumIntersection += minVal;
+                faultMaxPossible += f;
+            }
+
+            // Porcentaje relativo al total máximo posible de esa falla
+            const matchPct = faultMaxPossible > 0 ? Math.min(100, (sumIntersection / faultMaxPossible) * 100) : 0;
+
+            return {
+                fault,
+                intersections,
+                sumIntersection: Number(sumIntersection.toFixed(2)),
+                matchPct: Number(matchPct.toFixed(1)),
+                isReliable: sumIntersection >= thresholdSum
+            };
+        }
+
+        function handleRunDiagnosisClick() {
+            runDiagnosis();
+
+            if (currentMode === 'specific' && selectedFaultIds.size < 2) {
+                const warn = document.getElementById('specific-warning');
+                if (warn) {
+                    warn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                return;
+            }
+
+            const paso2 = document.getElementById('paso-2');
+            if (paso2) {
+                paso2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                paso2.classList.add('ring-2', 'ring-cobalt-500', 'rounded-2xl', 'p-2', 'bg-white/60');
+                setTimeout(() => {
+                    paso2.classList.remove('ring-2', 'ring-cobalt-500', 'rounded-2xl', 'p-2', 'bg-white/60');
+                }, 900);
+            }
+        }
+
+        function runDiagnosis() {
+            const warning = document.getElementById('specific-warning');
+            let candidates = FAULTS_DB;
+
+            if (currentMode === 'specific') {
+                if (selectedFaultIds.size < 2) {
+                    warning.classList.remove('hidden');
+                    return;
+                }
+                warning.classList.add('hidden');
+                candidates = FAULTS_DB.filter(f => selectedFaultIds.has(f.id));
+            } else {
+                warning.classList.add('hidden');
+            }
+
+            const results = candidates.map(evaluateFault).sort((a, b) => b.sumIntersection - a.sumIntersection);
+            renderBanner(results);
+            renderRankingTable(results);
+            if (results.length > 0) {
+                renderBreakdownBars(results[0]);
+            }
+        }
+
+        function renderBanner(results) {
+            const container = document.getElementById('result-banner-container');
+            const best = results[0];
+
+            if (!best || !best.isReliable) {
+                const bestScore = best ? best.sumIntersection.toFixed(2) : '0.00';
+                const bestName = best ? best.fault.name : 'Ninguna';
+                container.innerHTML = `
+                    <div class="bg-rose-50 border-2 border-rose-300 rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start gap-4">
+                        <div class="p-3 rounded-xl bg-white border border-rose-200 text-rose-600 shrink-0">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="text-xs font-mono font-bold uppercase tracking-wider text-rose-700">Resultado del Diagnóstico • Bajo Umbral</span>
+                            <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">
+                                Ninguna falla coincide de forma confiable con los síntomas capturados (No supera el umbral)
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-700">
+                                La puntuación más alta obtenida fue <span class="font-mono font-bold text-rose-700">&Sigma; = ${bestScore}</span> (correspondiente a <strong>${bestName}</strong>), la cual no alcanza el umbral mínimo requerido de <span class="font-mono font-bold">${thresholdSum.toFixed(2)} pts</span>.
+                            </p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Verificar empates en el primer lugar
+            const winners = results.filter(r => r.sumIntersection === best.sumIntersection);
+
+            container.innerHTML = winners.map((w, idx) => `
+                <div class="bg-emerald-50/70 border-2 border-emerald-500 rounded-2xl p-6 shadow-xs space-y-4 ${idx > 0 ? 'mt-4' : ''}">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-200 pb-4">
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono text-xs font-bold">
+                                    ${winners.length > 1 ? 'EMPATE EN MAYOR INTERSECCIÓN' : 'DIAGNÓSTICO CONFIABLE'}
+                                </span>
+                                <span class="text-xs font-semibold text-emerald-800">${w.fault.code} • ${w.fault.subsystem}</span>
+                            </div>
+                            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900">${w.fault.name}</h3>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white border border-emerald-200 rounded-xl px-4 py-2.5 shrink-0">
+                            <div class="text-center">
+                                <span class="text-[10px] font-bold uppercase text-slate-400 block">Suma Intersección (&Sigma;)</span>
+                                <span class="font-mono text-xl font-extrabold text-emerald-600">${w.sumIntersection.toFixed(2)}</span>
+                            </div>
+                            <div class="text-center border-l border-slate-200 pl-4">
+                                <span class="text-[10px] font-bold uppercase text-slate-400 block">Coincidencia</span>
+                                <span class="font-mono text-xl font-extrabold text-cobalt-600">${w.matchPct}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+                        <div class="bg-white border border-emerald-200 rounded-xl p-4 space-y-1">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-800 block">Origen de la Falla</span>
+                            <p class="text-slate-600 leading-relaxed">${w.fault.origin}</p>
+                        </div>
+                        <div class="bg-white border border-emerald-200 rounded-xl p-4 space-y-1">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 block">Solución / Tratamiento Recomendado</span>
+                            <p class="text-slate-700 leading-relaxed">${w.fault.repair}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRankingTable(results) {
+            const tbody = document.getElementById('ranking-table-body');
+            tbody.innerHTML = results.map((r, index) => {
+                const isTop = index === 0 && r.isReliable;
+                return `
+                    <tr class="${isTop ? 'bg-emerald-50/60 font-semibold' : 'hover:bg-slate-50'} transition">
+                        <td class="px-4 py-3 font-mono text-slate-500">#${index + 1}</td>
+                        <td class="px-4 py-3 text-slate-900">
+                            <span class="font-mono text-xs font-bold text-cobalt-600 mr-1.5">${r.fault.code}</span>${r.fault.name}
+                        </td>
+                        <td class="px-4 py-3 text-center font-mono font-bold text-slate-900">${r.sumIntersection.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-center font-mono text-cyanforge-700 font-semibold">${r.matchPct}%</td>
+                        <td class="px-4 py-3 text-center">
+                            ${r.isReliable
+                                ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Confiable</span>'
+                                : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">No confiable</span>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderBreakdownBars(topResult) {
+            document.getElementById('breakdown-title').textContent = `Comparación Síntoma por Síntoma: Usuario vs. ${topResult.fault.name}`;
+            const container = document.getElementById('breakdown-bars');
+
+            container.innerHTML = SYMPTOMS.map((s, i) => {
+                const u = userVector[i];
+                const f = topResult.fault.symptoms[i];
+                const inter = topResult.intersections[i];
+
+                return `
+                    <div class="bg-alabaster border border-slate-200 rounded-xl p-3 space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-slate-800 truncate" title="${s.name}">
+                                <span class="font-mono text-cobalt-600">${s.code}:</span> ${s.name}
+                            </span>
+                            <span class="font-mono text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md shrink-0">
+                                min = ${inter.toFixed(2)}
+                            </span>
+                        </div>
+
+                        <div class="space-y-1.5 text-[11px] font-mono">
+                            <div class="flex items-center gap-2">
+                                <span class="w-12 text-slate-500">Usuario</span>
+                                <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-cobalt-600 rounded-full" style="width: ${u * 100}%"></div>
+                                </div>
+                                <span class="w-8 text-right font-semibold text-cobalt-700">${u.toFixed(2)}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-12 text-slate-500">Falla</span>
+                                <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-cyanforge-600 rounded-full" style="width: ${f * 100}%"></div>
+                                </div>
+                                <span class="w-8 text-right font-semibold text-cyanforge-700">${f.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // =========================================================================
+        // 9. MÓDULO PRE-CARGADO (TABLA 10×15 Y CATÁLOGO)
+        // =========================================================================
+        function renderPreloadedModule() {
+            const header = document.getElementById('matrix-header');
+            header.innerHTML = `<th class="px-3 py-2.5 font-sans">Falla Automotriz</th>` +
+                SYMPTOMS.map(s => `<th class="px-2 py-2.5 text-center">${s.code}</th>`).join('');
+
+            const body = document.getElementById('matrix-body');
+            body.innerHTML = FAULTS_DB.map(f => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-3 py-2 font-sans font-semibold text-slate-800 whitespace-nowrap">${f.code} - ${f.name}</td>
+                    ${f.symptoms.map(val => `
+                        <td class="px-2 py-2 text-center ${val >= 0.7 ? 'text-cobalt-700 font-bold bg-cobalt-50' : val > 0 ? 'text-slate-700' : 'text-slate-400'}">
+                            ${val.toFixed(1)}
+                        </td>
+                    `).join('')}
+                </tr>
+            `).join('');
+
+            const catalog = document.getElementById('faults-catalog');
+            catalog.innerHTML = FAULTS_DB.map(f => `
+                <div class="bg-alabaster border border-slate-200 rounded-xl p-4 flex flex-col justify-between gap-2.5">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <span class="font-mono text-xs font-bold text-cobalt-600">${f.code}</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-cyanforge-50 text-cyanforge-700 border border-cyan-200">${f.subsystem}</span>
+                        </div>
+                        <h3 class="text-sm font-extrabold text-slate-900">${f.name}</h3>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed"><strong>Origen:</strong> ${f.origin}</p>
+                    </div>
+                    <p class="text-xs text-emerald-800 pt-2 border-t border-slate-200 leading-relaxed"><strong>Reparación:</strong> ${f.repair}</p>
+                </div>
+            `).join('');
+        }
+
+        function toggleMatrixTable() {
+            const wrapper = document.getElementById('matrix-wrapper');
+            const btn = document.getElementById('btn-toggle-matrix');
+            const hidden = wrapper.classList.contains('hidden');
+            if (hidden) {
+                wrapper.classList.remove('hidden');
+                btn.textContent = 'Ocultar Matriz Numérica (10×15)';
+            } else {
+                wrapper.classList.add('hidden');
+                btn.textContent = 'Mostrar Matriz Numérica (10×15)';
+            }
+        }
+
+        // =========================================================================
+        // 10. INICIALIZACIÓN
+        // =========================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            renderSymptomsGrid();
+            renderSpecificCheckboxes();
+            renderPreloadedModule();
+            loadPreset('bobina');
+        });
+    </script>
+</body>
+</html>
